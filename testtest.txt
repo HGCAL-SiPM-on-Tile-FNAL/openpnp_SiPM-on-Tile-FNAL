@@ -1,3 +1,0 @@
-hello test file for git merge conflicts
-
-conflict conflict substituting something next
