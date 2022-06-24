@@ -1,3 +1,0 @@
-hello test file for git merge conflicts
-
-ok just resolve this by doing this
