@@ -114,7 +114,7 @@ public class ReferencePnpJobProcessor extends AbstractPnpJobProcessor {
         noSpaceName = noSpaceName.replaceAll(":", "_");
 
         byte[] bytesArray; /*Temp byte array for writing to the file*/
-        String name = "cornerLog//"+ noSpaceName + "";
+        String name = "CornerLog//"+ noSpaceName + "";
         File tileDataFile = new File(name+".csv");
 	    Timing.fileName = name+".csv";
         /*Create the file if it does not already exist*/
