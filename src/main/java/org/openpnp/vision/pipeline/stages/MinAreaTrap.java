@@ -303,7 +303,7 @@ public class MinAreaTrap extends CvStage {
 
         if(jobProcessor != null){
 	    t_job = "No Job";
-        else{
+        }else{
             t_job = "No Job";
         }
 
