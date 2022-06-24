@@ -1,0 +1,134 @@
+Setting Up OpenPnP Software
+
+
+
+1. Install Java
+
+ - Files Here: https://urldefense.com/v3/__https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html__;!!PhOWcWs!2ijW0lc0DR9Wxs71Y2fW4Dm6Q66w3azgKZrYN-R2NHEobmC_bnlt8RnvpljkbU2vNl6xoIFLzsRJlzk$
+ - Instructions on how to add to path: https://urldefense.com/v3/__https://java.com/en/download/help/path.html__;!!PhOWcWs!2ijW0lc0DR9Wxs71Y2fW4Dm6Q66w3azgKZrYN-R2NHEobmC_bnlt8RnvpljkbU2vNl6xoIFL4CvtrYs$ 
+
+
+
+2. Install Maven
+
+ - Files Here: https://urldefense.com/v3/__https://maven.apache.org/download.cgi__;!!PhOWcWs!2ijW0lc0DR9Wxs71Y2fW4Dm6Q66w3azgKZrYN-R2NHEobmC_bnlt8RnvpljkbU2vNl6xoIFLNXRnmEM$ 
+ - Instructions Here: https://urldefense.com/v3/__https://maven.apache.org/install.html__;!!PhOWcWs!2ijW0lc0DR9Wxs71Y2fW4Dm6Q66w3azgKZrYN-R2NHEobmC_bnlt8RnvpljkbU2vNl6xoIFLfNkgJ_o$ 
+
+
+
+3. Download OpenPnP Git Repository
+
+   On terminal or powershell, navigate to the directory where OpenPnP should be downloaded, then:
+	"git clone https://github.com/openpnp/openpnp"
+
+
+
+4. Add Files
+
+ - Copy   MaskMinAreaRect.java    to   src/main/java/org/openpnp/vision/pipeline/stages/MaskMinAreaRect.java
+ - Copy   MinAreaTrap.java        to   src/main/java/org/openpnp/vision/pipeline/stages/MinAreaTrap.java
+ - Copy   DetectLinesHoughP.java  to   src/main/java/org/openpnp/vision/pipeline/stages/DetectLinesHoughP.java
+ - Copy   Timing.java             to   src/main/java/org/openpnp/Timing.java
+
+
+
+5. Edit Some Code
+
+ - In Timing.java along with other import statements, add
+	"import java.time.LocalDateTime;"
+
+ - In Main.java in the main function (public static void main), add
+	"Timing.start = LocalDateTime.now();"
+
+ - in ReferencePnpJobProcessor.java along with other import statements, add
+	"import java.io.File;"
+	"import java.io.FileOutputStream;"
+	"import org.openpnp.Timing;"
+
+ - In ReferencePnpJobProcessor.java in the initialize method (public synchronized void initialize), add
+ 	if(Timing.start != null) {
+            String noSpaceName = Timing.start + "";
+            /*Windows rejects any name with a space / or : so we remove them*/
+            noSpaceName = noSpaceName.replaceAll(" ", "_");
+            noSpaceName = noSpaceName.replaceAll("/", "_");
+            noSpaceName = noSpaceName.replaceAll(":", "_");
+
+            byte[] bytesArray; /*Temp byte array for writing to the file*/
+            String name = "cornerLog//"+ noSpaceName + "";
+            File tileDataFile = new File(name+".csv");
+            Timing.fileName = name+".csv";
+            /*Create the file if it does not already exist*/
+            tileDataFile.createNewFile();
+            FileOutputStream oFile = new FileOutputStream(tileDataFile, true);
+            String toPrint = "";
+            toPrint = "Job:, " + this.job.getFile().getName()+"\n";
+            toPrint += "\n";
+            bytesArray = toPrint.getBytes();
+            oFile.write(bytesArray);
+            oFile.flush();
+        }
+
+ - In ReferenceBottomVision.java after "if (nozzle.getPart() != null && nozzle.getPart().getPackage() != null) {" in preparePipeline, add
+	"pipeline.setProperty("nozzle", nozzle);"
+
+ - In CvPipelineEditor.java, add
+     "import org.openpnp.vision.pipeline.stages.DetectLinesHoughP;"
+     "import org.openpnp.vision.pipeline.stages.MaskMinAreaRect;"
+     "import org.openpnp.vision.pipeline.stages.MinAreaTrap;"
+	"registerStageClass(DetectLinesHoughP.class);"
+	"registerStageClass(MaskMinAreaRect.class);"
+	"registerStageClass(MinAreaTrap.class);"
+
+
+
+6. Create Cornerlog And JobData Folder
+
+   In the top level of OpenPnP directory,
+	"mkdir CornerLog"
+	"mkdir JobData"
+
+
+
+7. Build
+
+   In the top level of OpenPnP directory,
+	"mvn package"
+
+
+
+8. Start Program
+
+   In the top level of OpenPnP directory,
+	".\openpnp.bat"
+
+
+
+9. Ensure that the tile dimensions are present in the tile’s package
+
+
+
+
+
+
+GUI
+
+1. Install Python3.8
+
+Files Here: https://urldefense.com/v3/__https://www.python.org/downloads/release/python-383/__;!!PhOWcWs!2ijW0lc0DR9Wxs71Y2fW4Dm6Q66w3azgKZrYN-R2NHEobmC_bnlt8RnvpljkbU2vNl6xoIFLB05wreM$ 
+
+
+
+2. Install Packages
+
+"pip install tkinter threading datetime clr matplotlib" 
+
+
+
+3. Run program 
+
+"python3.8 main_with_debug.py"
+
+
+
+
+

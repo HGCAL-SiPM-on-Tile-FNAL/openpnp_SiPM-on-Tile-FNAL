@@ -28,6 +28,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.io.File;
+import java.io.FileOutputStream;
+import org.openpnp.Timing;
 
 import org.openpnp.gui.support.Wizard;
 import org.openpnp.machine.reference.vision.AbstractPartAlignment;
@@ -103,6 +106,28 @@ public class ReferencePnpJobProcessor extends AbstractPnpJobProcessor {
             throw new Exception("Can't initialize with a null Job.");
         }
         this.job = job;
+	if(Timing.start != null) {
+        String noSpaceName = Timing.start + "";
+        /*Windows rejects any name with a space / or : so we remove them*/
+        noSpaceName = noSpaceName.replaceAll(" ", "_");
+        noSpaceName = noSpaceName.replaceAll("/", "_");
+        noSpaceName = noSpaceName.replaceAll(":", "_");
+
+        byte[] bytesArray; /*Temp byte array for writing to the file*/
+        String name = "cornerLog//"+ noSpaceName + "";
+        File tileDataFile = new File(name+".csv");
+	    Timing.fileName = name+".csv";
+        /*Create the file if it does not already exist*/
+        tileDataFile.createNewFile(); 
+        FileOutputStream oFile = new FileOutputStream(tileDataFile, true);
+        String toPrint = "";
+        toPrint = "Job:, " + this.job.getFile().getName()+"\n";
+        toPrint += "\n";
+        bytesArray = toPrint.getBytes();
+        oFile.write(bytesArray);
+        oFile.flush();
+	}
+
         currentStep = new PreFlight();
         this.fireJobState(Configuration.get().getMachine().getSignalers(), AbstractJobProcessor.State.STOPPED);
     }

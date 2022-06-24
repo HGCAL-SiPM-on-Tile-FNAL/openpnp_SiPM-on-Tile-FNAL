@@ -22,6 +22,7 @@ package org.openpnp;
 import java.awt.EventQueue;
 import java.io.File;
 import java.util.Locale;
+import java.time.LocalDateTime;
 
 import javax.swing.UIManager;
 
@@ -130,7 +131,7 @@ public class Main {
 
     public static void main(String[] args) {
         monkeyPatchBeansBinding();
-        
+        Timing.start = LocalDateTime.now();
         for (String s : args) {
             if (s.equals("--version")) {
                 System.out.println(getVersion());

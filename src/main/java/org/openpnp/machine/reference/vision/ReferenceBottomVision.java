@@ -413,6 +413,7 @@ public class ReferenceBottomVision extends AbstractPartAlignment {
         Length samplingSize = new Length(0.1, LengthUnit.Millimeters); // Default, if no setting on nozzle tip. 
         // Set the footprint.
         if (nozzle.getPart() != null && nozzle.getPart().getPackage() != null) {
+            pipeline.setProperty("nozzle",nozzle);
             Footprint footprint = nozzle.getPart().getPackage().getFootprint();
             pipeline.setProperty("footprint", footprint);
             partSize = bottomVisionSettings.getPartCheckSize(nozzle.getPart(), true);
