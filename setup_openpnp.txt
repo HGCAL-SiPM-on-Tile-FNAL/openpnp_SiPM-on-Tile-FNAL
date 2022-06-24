@@ -103,7 +103,7 @@ Setting Up OpenPnP Software
 
 
 
-9. Ensure that the tile dimensions are present in the tile’s package
+9. Ensure that the tile dimensions are present in the tile's package
 
 
 
