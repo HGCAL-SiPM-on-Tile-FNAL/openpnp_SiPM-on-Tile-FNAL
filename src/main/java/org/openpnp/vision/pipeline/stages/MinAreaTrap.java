@@ -33,6 +33,7 @@ import org.openpnp.model.Footprint.Pad;
 import org.openpnp.util.VisionUtils;
 import org.openpnp.spi.Camera;
 import org.openpnp.spi.Nozzle;
+import org.openpnp.spi.PnpJobProcessor.JobPlacement;
 import org.openpnp.model.Part;
 import org.openpnp.spi.Machine;
 import org.openpnp.spi.Movable;
@@ -353,7 +354,10 @@ public class MinAreaTrap extends CvStage {
         /*Get current nozzle information*/
 
         Nozzle noz = (Nozzle) pipeline.getProperty("nozzle");
-        Part part = (Part) pipeline.getProperty("part");
+	Part part = (Part) pipeline.getProperty("part");
+	//JobPlacement jobplacmnt = (JobPlacement) pipeline.getProperty("jobPlacement");
+        //Placement placmnt = (Placement) pipeline.getProperty("placement");
+ 
         //part.getName()
         Camera cam  = VisionUtils.getBottomVisionCamera();
         double unitPPX = cam.getUnitsPerPixel().getX();
@@ -370,14 +374,14 @@ public class MinAreaTrap extends CvStage {
         result = img.clone();
         Logger.debug("6.1");
         
-        //Logger.debug("Pipeline", pipeline.properties);
+        //Logger.debug("Pipeline",pipeline.properties);
 
         /*Write part id to file*/
-        
         toPrint = "part, " + noz.getPart().getId()+"\n";
         bytesArray = toPrint.getBytes();
         oFile.write(bytesArray);
         oFile.flush();
+
 
         toPrint = "iteration, " + Timing.counter+"\n";
         bytesArray = toPrint.getBytes();

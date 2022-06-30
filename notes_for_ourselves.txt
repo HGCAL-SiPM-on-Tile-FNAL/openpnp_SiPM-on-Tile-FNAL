@@ -1,0 +1,31 @@
+Notes for ourselves
+
+2022-06-30
+
+trying to access part ID and job name
+
+software has no problem with:
+
+        Nozzle noz = (Nozzle) pipeline.getProperty("nozzle");
+	JobPlacement jobplacmnt = (JobPlacement) pipeline.getProperty("jobPlacement");
+        Placement placmnt = (Placement) pipeline.getProperty("placement");
+        Part part = (Part) pipeline.getProperty("part");
+
+but it does have a problem with:
+
+        Logger.debug("part.getId(): "+part.getId());
+        Logger.debug("part.getName(): "+part.getName());
+	Logger.debug("placmnt.getPart().getId(): "+placmnt.getPart().getId());
+	Logger.debug("placmnt.getPart().getName(): "+placmnt.getPart().getName());
+
+	toPrint = "jobpl pl getPart getID, " + jobplacmnt.getPlacement().getPart().getId()+"\n";
+	toPrint = "jobpl pl getPart getName, " + jobplacmnt.getPlacement().getPart().getName()+"\n";
+	toPrint = "placement getPart getID, " + placmnt.getPart().getId()+"\n";
+	toPrint = "placement getPart getName, " + placmnt.getPart().getName()+"\n";
+	toPrint = "part getID, " + part.getId()+"\n";
+	toPrint = "part getName, " + part.getName()+"\n";
+
+what does work:
+        toPrint = "part, " + noz.getPart().getId()+"\n";                        // already in the code, returns e.g. "T18"
+        toPrint = "part name, " + noz.getPart().getName()+"\n";                 // works but returns "null"
+	toPrint = "Package: " + noz.getPart().getPackage().getId() + "\n";      // already in the code, returns e.g. "T18/19"

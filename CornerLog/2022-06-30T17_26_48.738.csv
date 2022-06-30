@@ -1,0 +1,42 @@
+DateTime:, 2022-06-30T17:29:11.503
+job:, No Job
+part (getID), T18
+part (getName), null
+iteration, 0
+List of Points
+x,535.5873396065014, y,183.00000000000728
+x,544.547559032023, y,910.3955908635253
+x,1263.908713063528, y,183.0
+x,1257.0025155439878, y,905.6732782193213
+Tile Dimensions
+top, measured px: ,728.3213500976562, measured mm: ,33.42718807437596, theoretical mm: ,33.68000000000001, diff: ,-0.2528119256240444
+bot, measured px: ,712.470667045109, measured mm: ,32.69970183024241, theoretical mm: ,32.93000000000001, diff: ,-0.23029816975759587
+right, measured px: ,722.7062767867349, measured mm: ,33.169477502537845, theoretical mm: ,33.68208759860351, diff: ,-0.5126100960656643
+left, measured px: ,727.4507535594746, measured mm: ,33.387230994695685, theoretical mm: ,33.68208759860351, diff: ,-0.2948566039078244
+Package: T18/T19
+top:,33.68
+bot:,32.93
+height:,33.68
+
+
+DateTime:, 2022-06-30T17:29:18.960
+job:, No Job
+part (getID), T18
+part (getName), null
+iteration, 0
+List of Points
+x,536.4645721925134, y,183.0
+x,545.187834224599, y,908.0
+x,1261.3333333333333, y,183.0
+x,1261.3333333333333, y,908.0
+Tile Dimensions
+top, measured px: ,724.8687744140625, measured mm: ,33.268727943142636, theoretical mm: ,33.68000000000001, diff: ,-0.41127205685737067
+bot, measured px: ,716.1455688476562, measured mm: ,32.868365887244366, theoretical mm: ,32.93000000000001, diff: ,-0.06163411275564101
+right, measured px: ,725.0, measured mm: ,33.27475069991163, theoretical mm: ,33.68208759860351, diff: ,-0.40733689869188083
+left, measured px: ,725.0524769389825, measured mm: ,33.27715919241113, theoretical mm: ,33.68208759860351, diff: ,-0.4049284061923757
+Package: T18/T19
+top:,33.68
+bot:,32.93
+height:,33.68
+
+

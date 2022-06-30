@@ -1,0 +1,40 @@
+DateTime:, 2022-06-30T16:30:50.907
+job:, No Job
+part, T18
+iteration, 0
+List of Points
+x,543.6638563985258, y,903.0006501915336
+x,1256.980484430767, y,902.6535374771627
+x,535.8597771801767, y,177.5
+x,1264.1031337698785, y,177.5
+Tile Dimensions
+top, measured px: ,728.2433471679688, measured mm: ,33.423608035701186, theoretical mm: ,33.68000000000001, diff: ,-0.25639196429882105
+bot, measured px: ,713.3166738083036, measured mm: ,32.7385303324986, theoretical mm: ,32.93, diff: ,-0.19146966750140137
+right, measured px: ,725.18854418621, measured mm: ,33.28340416307309, theoretical mm: ,33.68208759860351, diff: ,-0.3986834355304225
+left, measured px: ,725.542643683139, measured mm: ,33.29965598718795, theoretical mm: ,33.68208759860351, diff: ,-0.38243161141556214
+Package: T18/T19
+top:,33.68
+bot:,32.93
+height:,33.68
+
+
+DateTime:, 2022-06-30T16:31:03.542
+job:, No Job
+part, T18
+iteration, 0
+List of Points
+x,536.9611650485436, y,178.5
+x,1264.4030127634312, y,178.5
+x,545.0, y,903.0
+x,1257.6289700207774, y,903.0
+Tile Dimensions
+top, measured px: ,727.4417724609375, measured mm: ,33.386818796330395, theoretical mm: ,33.68000000000001, diff: ,-0.29318120366961153
+bot, measured px: ,712.6290283203125, measured mm: ,32.70697001224643, theoretical mm: ,32.93, diff: ,-0.22302998775356997
+right, measured px: ,724.5316667133949, measured mm: ,33.25325597804093, theoretical mm: ,33.6820875986035, diff: ,-0.42883162056256907
+left, measured px: ,724.5445966954795, measured mm: ,33.253849415186345, theoretical mm: ,33.6820875986035, diff: ,-0.42823818341715736
+Package: T18/T19
+top:,33.68
+bot:,32.93
+height:,33.68
+
+
