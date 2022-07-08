@@ -267,11 +267,11 @@ public class MinAreaTrap extends CvStage {
         noSpaceName = noSpaceName.replaceAll("/", "_");
         noSpaceName = noSpaceName.replaceAll(":", "_");
         
-	//Create directories if they don't exist
-	File dir_CornerLog = new File("CornerLog");
-	dir_CornerLog.mkdirs();
-	File dir_JobData = new File("JobData");
-	dir_JobData.mkdirs();
+	    //Create directories if they don't exist
+	    File dir_CornerLog = new File("CornerLog");
+	    dir_CornerLog.mkdirs();
+	    File dir_JobData = new File("JobData");
+	    dir_JobData.mkdirs();
 
 
         byte[] bytesArray; /*Temp byte array for writing to the file*/
@@ -281,6 +281,7 @@ public class MinAreaTrap extends CvStage {
         /*Create the file if it does not already exist*/
         tileDataFile.createNewFile(); 
         FileOutputStream oFile = new FileOutputStream(tileDataFile, true);
+
 
         /*Temp string buf*/
         String toPrint = "";
@@ -297,15 +298,16 @@ public class MinAreaTrap extends CvStage {
         String t_job= "";
         String t_board = "";
 
+
         Logger.debug("/*Get job info*/");
 
         /*Get job info*/
         ReferencePnpJobProcessor jobProcessor = (ReferencePnpJobProcessor) Configuration.get().getMachine().getPnpJobProcessor();
 
         if(jobProcessor != null){
-	    t_job = "No Job";
+	//    t_job = "No Job";
         }else{
-            t_job = "No Job";
+        //    t_job = "No Job";
         }
 
         String string_dir = "LogFiles//"+ noSpaceName + "//" + t_job;
@@ -337,7 +339,7 @@ public class MinAreaTrap extends CvStage {
         Logger.debug("/*Writes to cornerLog File*/");
         /*Writes to cornerLog File*/
         toPrint = "DateTime:, " + LocalDateTime.now()+"\n";
-        toPrint += "job:, " + t_job+"\n";
+        //toPrint += "job:, " + t_job+"\n";
         //toPrint += "board:, " + previousLine+"\n";
         //toPrint += "id:, " + last+"\n";
         bytesArray = toPrint.getBytes();
@@ -354,9 +356,9 @@ public class MinAreaTrap extends CvStage {
         /*Get current nozzle information*/
 
         Nozzle noz = (Nozzle) pipeline.getProperty("nozzle");
-	Part part = (Part) pipeline.getProperty("part");
-	//JobPlacement jobplacmnt = (JobPlacement) pipeline.getProperty("jobPlacement");
-        //Placement placmnt = (Placement) pipeline.getProperty("placement");
+	    Part part = (Part) pipeline.getProperty("part");
+	    //JobPlacement jobplacmnt = (JobPlacement) pipeline.getProperty("jobPlacement");
+	    //Placement placmnt = (Placement) pipeline.getProperty("placement");
  
         //part.getName()
         Camera cam  = VisionUtils.getBottomVisionCamera();
@@ -378,6 +380,12 @@ public class MinAreaTrap extends CvStage {
 
         /*Write part id to file*/
         toPrint = "part, " + noz.getPart().getId()+"\n";
+        bytesArray = toPrint.getBytes();
+        oFile.write(bytesArray);
+        oFile.flush();
+
+        //this block returns null as of now
+        toPrint = "job placement placement id, " + jobplacmnt.getPlacement() +"\n";
         bytesArray = toPrint.getBytes();
         oFile.write(bytesArray);
         oFile.flush();
@@ -410,7 +418,7 @@ public class MinAreaTrap extends CvStage {
         }
 
         Logger.debug("7.2");
-        Imgcodecs.imwrite("cornerLog//"+ noSpaceName + image_iteration_name + ".jpg", copy);
+        Imgcodecs.imwrite("CornerLog//"+ noSpaceName + image_iteration_name + ".jpg", copy);
 
         Logger.debug("8");
 

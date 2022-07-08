@@ -29,3 +29,29 @@ what does work:
         toPrint = "part, " + noz.getPart().getId()+"\n";                        // already in the code, returns e.g. "T18"
         toPrint = "part name, " + noz.getPart().getName()+"\n";                 // works but returns "null"
 	toPrint = "Package: " + noz.getPart().getPackage().getId() + "\n";      // already in the code, returns e.g. "T18/19"
+
+
+
+2022-07-07
+
+In ReferencePnpJobProcessor.java:
+
+   for (PlannedPlacement plannedPlacement : plannedPlacements) {
+        Logger.debug("trying things 1 {}", plannedPlacement.jobPlacement);                        // returns TileX
+        Logger.debug("trying things 2 {}", plannedPlacement.jobPlacement.getPartId());            // returns T18
+        plannedPlacement.jobPlacement.setStatus(Status.Processing);
+        Logger.debug("trying things 3 {}", plannedPlacement.jobPlacement);                        // returns TileX
+        Logger.debug("trying things 4 {}", plannedPlacement.jobPlacement.getPartId());            // returns T18
+        Logger.debug("trying things 7 {}", plannedPlacement.jobPlacement.getPlacement());         // returns TileX,T18,position,etc.
+        Logger.debug("trying things 8 {}", plannedPlacement.jobPlacement.getPlacement().getId()); // returns TileX
+
+      	}
+
+        Logger.debug("trying things 5 head {}", head);                                            // returns H1
+        Logger.debug("trying things 6 jobPlacements{}", jobPlacements);                           // returns [remaining tiles]
+
+
+   plannedPlacement.jobPlacement returns the same thing as plannedPlacement.jobPlacement.getPlacement().getId();. We know as long as we can access jobPlacement in the MinAreaTrap code, we can print the ID that we want in the .csv files. 
+
+   JobPlacement jobplacmnt = (JobPlacement) pipeline.getProperty("jobPlacement");       // returns null
+   List<JobPlacement> jobPlacement_list = jobProcessor.jobPlacements; //then loop       // error: "jobPlacements has protected access in org.openpnp.machine.reference.ReferencePnpJobProcessor"

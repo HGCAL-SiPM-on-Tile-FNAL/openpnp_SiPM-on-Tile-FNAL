@@ -496,9 +496,13 @@ public class ReferencePnpJobProcessor extends AbstractPnpJobProcessor {
 
             for (PlannedPlacement plannedPlacement : plannedPlacements) {
                 plannedPlacement.jobPlacement.setStatus(Status.Processing);
+                Logger.debug("part ID {}", plannedPlacement.jobPlacement);
+                Logger.debug("part placement {}", plannedPlacement.jobPlacement.getPlacement().getId());
             }
             
             Logger.debug("Planned placements {}", plannedPlacements);
+
+            Logger.debug("part ID list {}", jobPlacements);
             
             return new ChangeNozzleTips(plannedPlacements);
         }
@@ -613,6 +617,7 @@ public class ReferencePnpJobProcessor extends AbstractPnpJobProcessor {
                     params.put("jobProcessor", this);
                     params.put("part", part);
                     params.put("nozzle", nozzle);
+                    params.put("jobPlacement", jobPlacement);
                     params.put("placement", placement);
                     params.put("boardLocation", boardLocation);
                     params.put("feeder", feeder);
@@ -954,6 +959,7 @@ public class ReferencePnpJobProcessor extends AbstractPnpJobProcessor {
                 params.put("part", part);
                 params.put("nozzle", nozzle);
                 params.put("placement", placement);
+                params.put("jobPlacement", jobPlacement);
                 params.put("boardLocation", boardLocation);
                 params.put("placementLocationBase", placementLocation);
                 params.put("placementLocation", placementLocationPart);
@@ -980,6 +986,7 @@ public class ReferencePnpJobProcessor extends AbstractPnpJobProcessor {
                 params.put("part", part);
                 params.put("nozzle", nozzle);
                 params.put("placement", placement);
+                params.put("jobPlacement", jobPlacement);
                 params.put("boardLocation", boardLocation);
                 params.put("placementLocationBase", placementLocation);
                 params.put("placementLocation", placementLocationPart);
