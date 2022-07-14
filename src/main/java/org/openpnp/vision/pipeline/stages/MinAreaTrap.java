@@ -384,12 +384,13 @@ public class MinAreaTrap extends CvStage {
         oFile.write(bytesArray);
         oFile.flush();
 
+        /*
         //this block returns null as of now
         toPrint = "job placement placement id, " + jobplacmnt.getPlacement() +"\n";
         bytesArray = toPrint.getBytes();
         oFile.write(bytesArray);
         oFile.flush();
-
+        */
 
         toPrint = "iteration, " + Timing.counter+"\n";
         bytesArray = toPrint.getBytes();
