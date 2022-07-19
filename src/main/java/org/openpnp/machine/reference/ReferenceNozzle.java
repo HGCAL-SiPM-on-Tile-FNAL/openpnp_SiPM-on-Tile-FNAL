@@ -17,6 +17,7 @@ import org.openpnp.gui.support.PropertySheetWizardAdapter;
 import org.openpnp.gui.support.Wizard;
 import org.openpnp.machine.reference.ReferenceNozzleTip.VacuumMeasurementMethod;
 import org.openpnp.machine.reference.axis.ReferenceControllerAxis;
+import org.openpnp.machine.reference.camera.ReferenceCamera;
 import org.openpnp.machine.reference.solutions.ActuatorSolutions;
 import org.openpnp.machine.reference.wizards.ReferenceNozzleCameraOffsetWizard;
 import org.openpnp.machine.reference.wizards.ReferenceNozzleCompatibleNozzleTipsWizard;
@@ -492,16 +493,16 @@ public class ReferenceNozzle extends AbstractNozzle implements ReferenceHeadMoun
     @Override
     public Location toHeadLocation(Location location, Location currentLocation, LocationOption... options) {
         boolean quiet = Arrays.asList(options).contains(LocationOption.Quiet);
-        // Apply the rotationModeOffset.
-        if (rotationModeOffset != null) { 
-            location = location.subtractWithRotation(new Location(location.getUnits(), 0, 0, 0, rotationModeOffset));
-            if (!quiet) {
-                Logger.trace("{}.toHeadLocation({}, ...) rotation mode offset {}", getName(), location, rotationModeOffset);
-            }
-        }
-        // Apply runout compensation.
         // Check SuppressCompensation, in that case disable nozzle calibration
         if (! Arrays.asList(options).contains(LocationOption.SuppressDynamicCompensation)) {
+            // Apply the rotationModeOffset.
+            if (rotationModeOffset != null) { 
+                location = location.subtractWithRotation(new Location(location.getUnits(), 0, 0, 0, rotationModeOffset));
+                if (!quiet) {
+                    Logger.trace("{}.toHeadLocation({}, ...) rotation mode offset {}", getName(), location, rotationModeOffset);
+                }
+            }
+            // Apply runout compensation.
             ReferenceNozzleTip calibrationNozzleTip = getCalibrationNozzleTip();
             if (calibrationNozzleTip != null && calibrationNozzleTip.getCalibration().isCalibrated(this)) {
                 Location correctionOffset = calibrationNozzleTip.getCalibration().getCalibratedOffset(this, location.getRotation());
@@ -526,11 +527,11 @@ public class ReferenceNozzle extends AbstractNozzle implements ReferenceHeadMoun
                         calibrationNozzleTip.getCalibration().getCalibratedOffset(this, location.getRotation());
                 location = location.add(offset);
             }
-        }
-        // Unapply the rotationModeOffset.
-        if (rotationModeOffset != null) { 
-            location = location.addWithRotation(new Location(location.getUnits(), 
-                    0, 0, 0, rotationModeOffset));
+            // Unapply the rotationModeOffset.
+            if (rotationModeOffset != null) { 
+                location = location.addWithRotation(new Location(location.getUnits(), 
+                        0, 0, 0, rotationModeOffset));
+            }
         }
         return location;
     }
@@ -620,9 +621,9 @@ public class ReferenceNozzle extends AbstractNozzle implements ReferenceHeadMoun
             throw new Exception("Can't load incompatible nozzle tip.");
         }
 
-        if (nt.getNozzleAttachedTo() != null) {
+        if (nt.getNozzleWhereLoaded() != null) {
             // Nozzle tip is on different nozzle - unload it from there first.  
-            nt.getNozzleAttachedTo().unloadNozzleTip();
+            nt.getNozzleWhereLoaded().unloadNozzleTip();
         }
 
         unloadNozzleTip();

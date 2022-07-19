@@ -81,6 +81,9 @@ public class ReferencePnpJobProcessor extends AbstractPnpJobProcessor {
 
     @Attribute(required = false)
     protected int maxVisionRetries = 3;
+    
+    @Attribute(required = false)
+    boolean steppingToNextMotion = true;
 
     @Element(required = false)
     public PnpJobPlanner planner = new SimplePnpJobPlanner();
@@ -1182,6 +1185,15 @@ public class ReferencePnpJobProcessor extends AbstractPnpJobProcessor {
 
     public void setMaxVisionRetries(int maxVisionRetries) {
         this.maxVisionRetries = maxVisionRetries;
+    }
+
+    @Override
+    public boolean isSteppingToNextMotion() {
+        return steppingToNextMotion;
+    }
+
+    public void setSteppingToNextMotion(boolean steppingToNextMotion) {
+        this.steppingToNextMotion = steppingToNextMotion;
     }
 
     protected abstract class PlannedPlacementStep implements Step {

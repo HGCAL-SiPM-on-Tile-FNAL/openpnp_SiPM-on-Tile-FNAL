@@ -48,12 +48,12 @@ import org.openpnp.gui.support.AbstractConfigurationWizard;
 import org.openpnp.gui.support.Icons;
 import org.openpnp.gui.support.IntegerConverter;
 import org.openpnp.gui.support.LengthConverter;
-import org.openpnp.machine.reference.ReferenceCamera;
 import org.openpnp.machine.reference.ReferenceNozzle;
 import org.openpnp.machine.reference.ReferenceNozzleTip;
 import org.openpnp.machine.reference.ReferenceNozzleTipCalibration;
 import org.openpnp.machine.reference.ReferenceNozzleTipCalibration.BackgroundCalibrationMethod;
 import org.openpnp.machine.reference.ReferenceNozzleTipCalibration.RecalibrationTrigger;
+import org.openpnp.machine.reference.camera.ReferenceCamera;
 import org.openpnp.model.Configuration;
 import org.openpnp.model.LengthUnit;
 import org.openpnp.model.Location;
@@ -554,7 +554,7 @@ public class ReferenceNozzleTipCalibrationWizard extends AbstractConfigurationWi
         }
         else {
             // For real nozzle tips, the nozzle where it is currently attached to is well-defined.
-            refNozzle = nozzleTip.getNozzleAttachedTo();
+            refNozzle = nozzleTip.getNozzleWhereLoaded();
             if (refNozzle == null) {
                 throw new Exception("Please load the nozzle tip on a nozzle.");
             }

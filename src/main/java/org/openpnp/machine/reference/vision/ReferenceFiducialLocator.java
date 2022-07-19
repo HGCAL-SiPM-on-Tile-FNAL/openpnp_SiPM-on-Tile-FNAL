@@ -202,7 +202,32 @@ public class ReferenceFiducialLocator extends AbstractPartSettingsHolder impleme
         
         Utils2D.AffineInfo ai = Utils2D.affineInfo(tx);
         Logger.info("Fiducial results: " + ai);
-        
+        double[] matrix = new double[6];
+        tx.getMatrix(matrix);
+        Logger.info("Placement to machine transform X:"
+                + " X Factor: "+String.format("%12.6f", matrix[0])
+                + " Y Factor: "+String.format("%12.6f", matrix[1])
+                + " X Offset: "+String.format("%12.6f", matrix[4]));
+        Logger.info("Placement to machine transform Y:"
+                + " X Factor: "+String.format("%12.6f", matrix[2])
+                + " Y Factor: "+String.format("%12.6f", matrix[3])
+                + " Y Offset: "+String.format("%12.6f", matrix[5]));
+        try {
+            AffineTransform invTx = tx.createInverse();
+            invTx.getMatrix(matrix);
+            Logger.info("Machine to placement transform X:"
+                    + " X Factor: "+String.format("%12.6f", matrix[0])
+                    + " Y Factor: "+String.format("%12.6f", matrix[1])
+                    + " X Offset: "+String.format("%12.6f", matrix[4]));
+            Logger.info("Machine to placement transform Y:"
+                    + " X Factor: "+String.format("%12.6f", matrix[2])
+                    + " Y Factor: "+String.format("%12.6f", matrix[3])
+                    + " Y Offset: "+String.format("%12.6f", matrix[5]));
+        }
+        catch (Exception e) {
+            Logger.warn(e);
+        }
+
         double boardOffset = newBoardLocation.getLinearLengthTo(savedBoardLocation).convertToUnits(LengthUnit.Millimeters).getValue();
         Logger.info("Board origin offset distance: " + boardOffset + "mm");
         
@@ -414,7 +439,7 @@ public class ReferenceFiducialLocator extends AbstractPartSettingsHolder impleme
             pipeline.setProperty("fiducial.diameter", diameter);
             pipeline.setProperty("fiducial.maxDistance", getMaxDistance());
         }
-        pipeline.setProperties(pipelineParameterAssignments);
+        pipeline.addProperties(pipelineParameterAssignments);
     }
 
     public Location getFiducialLocation(Location nominalLocation, PartSettingsHolder partSettingsHolder) throws Exception {
@@ -635,6 +660,9 @@ public class ReferenceFiducialLocator extends AbstractPartSettingsHolder impleme
     @Override
     public Wizard getPartConfigurationWizard(PartSettingsHolder partSettingsHolder) {
         FiducialVisionSettings visionSettings = getInheritedVisionSettings(partSettingsHolder);
+        if (visionSettings == null) {
+            return null;
+        }
         try {
             visionSettings.getPipeline().setProperty("camera", getVisionCamera());
         }

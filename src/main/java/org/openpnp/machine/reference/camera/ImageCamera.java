@@ -38,7 +38,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openpnp.gui.support.Wizard;
-import org.openpnp.machine.reference.ReferenceCamera;
 import org.openpnp.machine.reference.SimulationModeMachine;
 import org.openpnp.machine.reference.camera.wizards.ImageCameraConfigurationWizard;
 import org.openpnp.model.AxesLocation;
@@ -254,7 +253,7 @@ public class ImageCamera extends ReferenceCamera {
         if (! ensureOpen()) {
             return null;
         }
-        Location location = SimulationModeMachine.getSimulatedPhysicalLocation(this, getLooking());
+        Location location = SimulationModeMachine.getSimulatedPhysicalLocation(this, getLooking(), false);
 
         BufferedImage frame = locationCapture(location, width, height, true);
         return frame;
@@ -562,7 +561,7 @@ public class ImageCamera extends ReferenceCamera {
             // Blur it to give us a tolerant best match.
             Imgproc.GaussianBlur(templateMat, templateMat, new Size(kernelSize, kernelSize), 0);
 
-            // Get a view of the target area that is 5 x bigger than the template but at least 100px. 
+            // Get a view of the target area that is 5 x bigger than the template but at least 80px. 
             int dimension = Math.max(Math.max(template.getWidth(), template.getHeight())*5, 80);
             BufferedImage targetArea = locationCapture(physicalLocation, dimension, dimension, false);
             mat = OpenCvUtils.toMat(targetArea);

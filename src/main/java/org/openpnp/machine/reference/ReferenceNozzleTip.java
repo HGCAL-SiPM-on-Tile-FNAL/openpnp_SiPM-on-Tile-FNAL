@@ -168,7 +168,7 @@ public class ReferenceNozzleTip extends AbstractNozzleTip {
     private Length maxPartDiameter = new Length(20, LengthUnit.Millimeters);
 
     @Element(required = false)
-    private Length maxPartHeight = new Length(10, LengthUnit.Millimeters);
+    private Length maxPartHeight = new Length(5, LengthUnit.Millimeters);
 
     @Element(required = false)
     protected Length maxPickTolerance = new Length(1, LengthUnit.Millimeters);
@@ -343,6 +343,7 @@ public class ReferenceNozzleTip extends AbstractNozzleTip {
                 };
     }
 
+    @Override
     public Length getMaxPartHeight() {
         return maxPartHeight;
     }
@@ -351,6 +352,7 @@ public class ReferenceNozzleTip extends AbstractNozzleTip {
         this.maxPartHeight = maxPartHeight;
     }
 
+    @Override
     public Length getMaxPartDiameter() {
         return maxPartDiameter;
     }
@@ -359,6 +361,7 @@ public class ReferenceNozzleTip extends AbstractNozzleTip {
         this.maxPartDiameter = maxPartDiameter;
     }
 
+    @Override
     public Length getMinPartDiameter() {
         return minPartDiameter;
     }
@@ -367,22 +370,13 @@ public class ReferenceNozzleTip extends AbstractNozzleTip {
         this.minPartDiameter = minPartDiameter;
     }
 
+    @Override
     public Length getMaxPickTolerance() {
         return maxPickTolerance;
     }
 
     public void setMaxPickTolerance(Length maxPickTolerance) {
         this.maxPickTolerance = maxPickTolerance;
-    }
-
-    public Length getMinPartDiameterWithTolerance() {
-        return getMinPartDiameter()
-                .subtract(getMaxPickTolerance().multiply(2.0));
-    }
-
-    public Length getMaxPartDiameterWithTolerance() {
-        return getMaxPartDiameter()
-                .add(getMaxPickTolerance().multiply(2.0));
     }
 
     public int getPickDwellMilliseconds() {
@@ -511,7 +505,8 @@ public class ReferenceNozzleTip extends AbstractNozzleTip {
         firePropertyChange("visionCalibrationTrigger", oldValue, visionCalibrationTrigger);
     }
 
-    public ReferenceNozzle getNozzleAttachedTo() {
+    @Override
+    public ReferenceNozzle getNozzleWhereLoaded() {
         for (Head head : Configuration.get().getMachine().getHeads()) {
             for (Nozzle nozzle : head.getNozzles()) {
                 if (nozzle instanceof ReferenceNozzle) {
@@ -715,7 +710,7 @@ public class ReferenceNozzleTip extends AbstractNozzleTip {
      */
     public Length getCalibrationOffsetZ() {
         Length offsetZ = null;
-        Nozzle nozzle = getNozzleAttachedTo();
+        Nozzle nozzle = getNozzleWhereLoaded();
         if (nozzle instanceof ContactProbeNozzle) {
             offsetZ = ((ContactProbeNozzle) nozzle).getCalibrationOffsetZ();
         }
@@ -1193,7 +1188,7 @@ public class ReferenceNozzleTip extends AbstractNozzleTip {
                 Mat templateMatOccupied = OpenCvUtils.toMat(templateOccupied);
                 try {
                     Location originalLocation = location;
-                    boolean shouldBeOccupied = (getNozzleAttachedTo() == null);
+                    boolean shouldBeOccupied = (getNozzleWhereLoaded() == null);
                     for (int pass = 0; pass < visionCalibrationMaxPasses; ++pass) {
                         BufferedImage cameraImage = camera.lightSettleAndCapture();
                         int x = (cameraImage.getWidth() - width) / 2;
