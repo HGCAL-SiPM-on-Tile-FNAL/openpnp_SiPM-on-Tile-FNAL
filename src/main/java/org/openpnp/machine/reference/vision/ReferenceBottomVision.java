@@ -456,6 +456,7 @@ public class ReferenceBottomVision extends AbstractPartAlignment {
             pipeline.setProperty("camera", camera);
             Length samplingSize = new Length(0.1, LengthUnit.Millimeters); // Default, if no setting on nozzle tip. 
             // Set the footprint.
+	    pipeline.setProperty("nozzle",nozzle); //DGRK_added
             pipeline.setProperty("footprint", composite.getFootprint());
             // Set alignment parameters.
             pipeline.setProperty("MinAreaRect.center", wantedLocation);
