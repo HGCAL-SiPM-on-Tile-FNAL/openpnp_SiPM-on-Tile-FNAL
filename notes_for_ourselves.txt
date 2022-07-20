@@ -55,3 +55,21 @@ In ReferencePnpJobProcessor.java:
 
    JobPlacement jobplacmnt = (JobPlacement) pipeline.getProperty("jobPlacement");       // returns null
    List<JobPlacement> jobPlacement_list = jobProcessor.jobPlacements; //then loop       // error: "jobPlacements has protected access in org.openpnp.machine.reference.ReferencePnpJobProcessor"
+
+
+
+2022-07-20
+
+Completed: create new .csv file when job is run. Initialize_xx.csv for when we measure outside of a job, Job_xx.csv for when we run a job
+
+Config directory C:\Users\ppd-cap-ppd-137190\.openpnp2
+in\backups, copy files from 
+
+\backups\2022-07-06_16.10.45_develop_FNAL_test20220630               for develop_FNAL_test20220630 branch
+\backups\2022-07-20_16.52.03_test_FNAL_test20220719                  for test_FNAL_test20220719 branch
+
+
+
+
+
+
