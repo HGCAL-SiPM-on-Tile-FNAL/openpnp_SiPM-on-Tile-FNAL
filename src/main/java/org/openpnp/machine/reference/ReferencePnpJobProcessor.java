@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.time.LocalDateTime;
 import org.openpnp.Timing;
 
 import org.openpnp.gui.support.Wizard;
@@ -106,8 +107,10 @@ public class ReferencePnpJobProcessor extends AbstractPnpJobProcessor {
             throw new Exception("Can't initialize with a null Job.");
         }
         this.job = job;
-	if(Timing.start != null) {
-        String noSpaceName = Timing.start + "";
+
+	Timing.start_job = LocalDateTime.now();
+	if(Timing.start != null && Timing.start_job != null) {
+	    String noSpaceName = "Job_" + Timing.start_job + "";
         /*Windows rejects any name with a space / or : so we remove them*/
         noSpaceName = noSpaceName.replaceAll(" ", "_");
         noSpaceName = noSpaceName.replaceAll("/", "_");
@@ -1139,6 +1142,7 @@ public class ReferencePnpJobProcessor extends AbstractPnpJobProcessor {
                         df.format(totalPartsPlaced / (dtSec / 3600.0)));
             }
 
+	    Timing.start_job = null;
             return null;
         }
     }

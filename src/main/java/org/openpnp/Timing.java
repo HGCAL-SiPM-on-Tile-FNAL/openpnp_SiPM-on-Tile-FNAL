@@ -44,6 +44,7 @@ import java.time.LocalDateTime;
 
 public class Timing {
     public static LocalDateTime start;
+    public static LocalDateTime start_job;
     public static int counter;
     public static double xDiff;
     public static double yDiff;
