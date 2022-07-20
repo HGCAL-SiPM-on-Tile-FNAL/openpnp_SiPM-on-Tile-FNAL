@@ -260,8 +260,17 @@ public class MinAreaTrap extends CvStage {
         
         image_iteration += 1;
         String image_iteration_name = "" + image_iteration;
+
+
+
         /*Set up debugging file*/
-        String noSpaceName = Timing.start + "";
+        String noSpaceName;
+       if(Timing.start_job != null) {
+            noSpaceName = "Job_" + Timing.start_job + "";
+        } else {
+            noSpaceName = "Initialize_" + Timing.start + "";
+        }
+    
         /*Windows rejects any name with a space / or : so we remove them*/
         noSpaceName = noSpaceName.replaceAll(" ", "_");
         noSpaceName = noSpaceName.replaceAll("/", "_");
@@ -298,7 +307,7 @@ public class MinAreaTrap extends CvStage {
         String t_job= "";
         String t_board = "";
 
-
+        
         Logger.debug("/*Get job info*/");
 
         /*Get job info*/
@@ -309,7 +318,7 @@ public class MinAreaTrap extends CvStage {
         }else{
         //    t_job = "No Job";
         }
-
+        
         String string_dir = "LogFiles//"+ noSpaceName + "//" + t_job;
 
         File testTileDataFile = new File(string_dir);
@@ -386,7 +395,7 @@ public class MinAreaTrap extends CvStage {
 
         /*
         //this block returns null as of now
-        toPrint = "job placement placement id, " + jobplacmnt.getPlacement() +"\n";
+        toPrint = "job placement placement id, " + jobplacmnt.getPlacement().getId() +"\n";
         bytesArray = toPrint.getBytes();
         oFile.write(bytesArray);
         oFile.flush();

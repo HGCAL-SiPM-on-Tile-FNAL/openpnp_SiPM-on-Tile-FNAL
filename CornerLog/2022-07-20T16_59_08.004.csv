@@ -1,0 +1,21 @@
+Job:, D8 Apr 11 2022.job.xml
+
+DateTime:, 2022-07-20T16:59:20.912
+part, T18
+iteration, 0
+List of Points
+x,1257.0, y,186.25034626038783
+x,1257.0, y,912.0
+x,532.4638133269261, y,186.5012244413688
+x,540.7849462365591, y,912.0
+Tile Dimensions
+top, measured px: ,724.5362372793237, measured mm: ,33.25346574968485, theoretical mm: ,33.68000000000001, diff: ,-0.42653425031515724
+bot, measured px: ,716.2150268554688, measured mm: ,32.8715537464086, theoretical mm: ,32.93000000000001, diff: ,-0.05844625359140565
+right, measured px: ,725.7496337890625, measured mm: ,33.30915604811478, theoretical mm: ,33.68208759860351, diff: ,-0.3729315504887296
+left, measured px: ,725.5464978768539, measured mm: ,33.29983288006383, theoretical mm: ,33.68208759860351, diff: ,-0.3822547185396772
+Package: T18/T19
+top:,33.68
+bot:,32.93
+height:,33.68
+
+
