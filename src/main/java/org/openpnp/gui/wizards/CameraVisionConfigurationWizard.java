@@ -36,6 +36,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
 import org.openpnp.gui.MainFrame;
@@ -77,7 +78,7 @@ public class CameraVisionConfigurationWizard extends AbstractConfigurationWizard
         contentPanel.add(panelVision);
         panelVision.setLayout(new FormLayout(new ColumnSpec[] {
                 FormSpecs.RELATED_GAP_COLSPEC,
-                FormSpecs.DEFAULT_COLSPEC,
+                ColumnSpec.decode("max(70dlu;default)"),
                 FormSpecs.RELATED_GAP_COLSPEC,
                 ColumnSpec.decode("max(70dlu;default)"),
                 FormSpecs.RELATED_GAP_COLSPEC,
@@ -92,21 +93,21 @@ public class CameraVisionConfigurationWizard extends AbstractConfigurationWizard
                 ColumnSpec.decode("min:grow"),
                 FormSpecs.RELATED_GAP_COLSPEC,
                 FormSpecs.DEFAULT_COLSPEC,},
-                new RowSpec[] {
-                        FormSpecs.RELATED_GAP_ROWSPEC,
-                        FormSpecs.MIN_ROWSPEC,
-                        FormSpecs.RELATED_GAP_ROWSPEC,
-                        FormSpecs.MIN_ROWSPEC,
-                        FormSpecs.RELATED_GAP_ROWSPEC,
-                        FormSpecs.DEFAULT_ROWSPEC,
-                        FormSpecs.RELATED_GAP_ROWSPEC,
-                        FormSpecs.DEFAULT_ROWSPEC,
-                        FormSpecs.RELATED_GAP_ROWSPEC,
-                        FormSpecs.DEFAULT_ROWSPEC,
-                        FormSpecs.RELATED_GAP_ROWSPEC,
-                        FormSpecs.DEFAULT_ROWSPEC,
-                        FormSpecs.RELATED_GAP_ROWSPEC,
-                        RowSpec.decode("max(70dlu;default):grow"),}));
+            new RowSpec[] {
+                FormSpecs.RELATED_GAP_ROWSPEC,
+                FormSpecs.MIN_ROWSPEC,
+                FormSpecs.RELATED_GAP_ROWSPEC,
+                FormSpecs.MIN_ROWSPEC,
+                FormSpecs.RELATED_GAP_ROWSPEC,
+                FormSpecs.DEFAULT_ROWSPEC,
+                FormSpecs.RELATED_GAP_ROWSPEC,
+                FormSpecs.DEFAULT_ROWSPEC,
+                FormSpecs.RELATED_GAP_ROWSPEC,
+                FormSpecs.DEFAULT_ROWSPEC,
+                FormSpecs.RELATED_GAP_ROWSPEC,
+                FormSpecs.DEFAULT_ROWSPEC,
+                FormSpecs.RELATED_GAP_ROWSPEC,
+                RowSpec.decode("max(70dlu;default):grow"),}));
 
         lblSettleMethod = new JLabel("Settle Method");
         panelVision.add(lblSettleMethod, "2, 2, 1, 3, right, default");
@@ -237,7 +238,7 @@ public class CameraVisionConfigurationWizard extends AbstractConfigurationWizard
         panelVision.add(settleDiagnostics, "10, 12");
 
         lblSettleGraph = new JLabel("<html>\r\n<body style=\"text-align:right\">\r\n<p>\r\nDifference <span style=\"color:#FF0000\">&mdash;&mdash;</span>\r\n</p>\r\n<p>\r\nThreshold <span style=\"color:#00BB00\">&mdash;&mdash;</span>\r\n</p>\r\n<p>\r\nCapture <span style=\"color:#005BD9\">&mdash;&mdash;</span>\r\n</p>\r\n</body>\r\n</html>");
-        panelVision.add(lblSettleGraph, "2, 14");
+        panelVision.add(lblSettleGraph, "2, 14, right, default");
 
         settleGraph = new SimpleGraphView();
         settleGraph.addPropertyChangeListener(new PropertyChangeListener() {
@@ -355,13 +356,16 @@ public class CameraVisionConfigurationWizard extends AbstractConfigurationWizard
                 }
                 initialJogWarningDisplayed = true;
             }
-            UiUtils.submitUiMachineTask(() -> {
-                if (jogTool instanceof Camera) {
-                    camera.moveToSafeZ();
-                }
-                MainFrame.get().getMachineControls().getJogControlsPanel().jogTool(x, y, 0, c, jogTool);
-                MainFrame.get().getMachineControls().getJogControlsPanel().jogTool(-x, -y, 0, -c, jogTool);
-                camera.lightSettleAndCapture();
+            SwingUtilities.invokeLater(() -> {
+                // There is some strange redraw related race, so do this later.
+                UiUtils.submitUiMachineTask(() -> {
+                    if (jogTool instanceof Camera) {
+                        camera.moveToSafeZ();
+                    }
+                    MainFrame.get().getMachineControls().getJogControlsPanel().jogTool(x, y, 0, c, jogTool);
+                    MainFrame.get().getMachineControls().getJogControlsPanel().jogTool(-x, -y, 0, -c, jogTool);
+                    camera.lightSettleAndCapture();
+                });
             });
         });
     }
@@ -456,8 +460,8 @@ public class CameraVisionConfigurationWizard extends AbstractConfigurationWizard
         }
         @Override
         public void actionPerformed(ActionEvent e) {
+            applyAction.actionPerformed(e);
             UiUtils.messageBoxOnException(() -> {
-                applyAction.actionPerformed(e);
                 camera.lightSettleAndCapture();
                 MovableUtils.fireTargetedUserAction(camera);
             });

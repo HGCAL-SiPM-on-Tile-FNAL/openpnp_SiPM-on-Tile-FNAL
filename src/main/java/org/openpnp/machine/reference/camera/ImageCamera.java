@@ -29,6 +29,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.net.URL;
+import java.util.stream.IntStream;
 
 import javax.imageio.ImageIO;
 
@@ -40,6 +41,7 @@ import org.opencv.imgproc.Imgproc;
 import org.openpnp.gui.support.Wizard;
 import org.openpnp.machine.reference.SimulationModeMachine;
 import org.openpnp.machine.reference.camera.wizards.ImageCameraConfigurationWizard;
+import org.openpnp.machine.reference.solutions.CameraSolutions;
 import org.openpnp.model.AxesLocation;
 import org.openpnp.model.Footprint;
 import org.openpnp.model.Length;
@@ -122,6 +124,8 @@ public class ImageCamera extends ReferenceCamera {
     @Deprecated
     @Attribute(required = false)
     private boolean subPixelRendering = true;
+
+    private double projectionFactor;
 
     public ImageCamera() {
         setUnitsPerPixel(new Location(LengthUnit.Millimeters, 0.04233, 0.04233, 0, 0));
@@ -330,7 +334,7 @@ public class ImageCamera extends ReferenceCamera {
             double tanYaw = sinYaw/cosYaw;
             double zFactorYaw = zFactor*sinYaw;
             double distort = 0.01*getSimulatedDistortion();
-            double projectionFactor = radius;
+            projectionFactor = radius;
             double zRotSin = Math.sin(zRotRad);
             double zRotCos = Math.cos(zRotRad);
             final int kernel_r = 1;
@@ -341,9 +345,12 @@ public class ImageCamera extends ReferenceCamera {
             for (int pass = 0; pass < 2; pass++) {
                 final int xStep = pass == 0 ? width/2 : 1;
                 final int yStep = pass == 0 ? height/2 : 1;
-                final int x1 = pass == 0 ? width : width-1;
+                final int x1 = pass == 0 ? 3 : width-1; //width : width-1;
                 final int y1 = pass == 0 ? height : height-1;
-                for (int x = 0; x <= x1; x += xStep) {
+                final int passf = pass;
+                IntStream.range(0, x1).parallel().forEach(xi -> {
+                    int x = xi*xStep;
+                //for (int x = 0; x <= x1; x += xStep) {
                     for (int y = 0; y <= y1; y += yStep) {
                         // Normed to ±1.0
                         double xN = (x + xo)*factor; 
@@ -368,7 +375,7 @@ public class ImageCamera extends ReferenceCamera {
                         double xP = (xT*projectionFactor - xo);
                         double yP = (yT*projectionFactor - yo);
 
-                        if (pass == 0) {
+                        if (passf == 0) {
                             // Minimize the projectionFactor.
                             if (xP < kernel_r) {
                                 projectionFactor = (kernel_r + xo)/xT;
@@ -419,7 +426,7 @@ public class ImageCamera extends ReferenceCamera {
                             }
                         }
                     }
-                }
+                });
             }
         }
 
@@ -688,12 +695,12 @@ public class ImageCamera extends ReferenceCamera {
                 @Override
                 public void setState(Solutions.State state) throws Exception {
                     if (state == Solutions.State.Solved) {
-                        OpenPnpCaptureCamera camera = createReplacementCamera();
-                        replaceCamera(camera);
+                        OpenPnpCaptureCamera camera = CameraSolutions.createReplacementCamera(ImageCamera.this);
+                        CameraSolutions.replaceCamera(camera);
                     }
                     else if (getState() == Solutions.State.Solved) {
                         // Place the old one back (from the captured ImageCamera.this).
-                        replaceCamera(ImageCamera.this);
+                        CameraSolutions.replaceCamera(ImageCamera.this);
                     }
                     super.setState(state);
                 }

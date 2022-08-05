@@ -576,7 +576,7 @@ public class BlindsFeeder extends ReferenceFeeder {
                 double x = rect.center.x;
                 double y = rect.center.y;
                 FluentCv.drawRotatedRect(mat, rect, color, 3);
-                Imgproc.circle(mat, new org.opencv.core.Point(x, y), 2, FluentCv.colorToScalar(centerColor), 3);
+                Imgproc.circle(mat, new org.opencv.core.Point(x, y), 2, FluentCv.colorToScalar(centerColor), 3, Imgproc.LINE_AA);
             }
         }
 
@@ -708,8 +708,8 @@ public class BlindsFeeder extends ReferenceFeeder {
 
                 Result ocrStageResult = pipeline.getResult("OCR"); 
                 if (ocrStageResult != null 
-                        && pipeline.getProperty("alphabet") instanceof String
-                        && ! ((String) pipeline.getProperty("alphabet")).isEmpty()) {
+                        && pipeline.getProperty("SimpleOcr.alphabet") instanceof String
+                        && ! ((String) pipeline.getProperty("SimpleOcr.alphabet")).isEmpty()) {
                     detectedOcrModel = ocrStageResult.getExpectedModel(SimpleOcr.OcrModel.class);
                 }
 
