@@ -41,10 +41,12 @@ import org.simpleframework.xml.Attribute;
 import org.pmw.tinylog.Logger;
 import org.openpnp.model.Job;
 import org.openpnp.machine.reference.ReferencePnpJobProcessor;
+import org.openpnp.machine.reference.vision.ReferenceBottomVision;
 import org.openpnp.gui.JobPanel;
 import java.time.LocalDateTime;
 import org.openpnp.model.Placement;
-
+import org.openpnp.model.BottomVisionSettings;
+import org.openpnp.machine.reference.vision.AbstractPartAlignment;
 class Pair{
     double x;
     double y;
@@ -261,14 +263,16 @@ public class MinAreaTrap extends CvStage {
         image_iteration += 1;
         String image_iteration_name = "" + image_iteration;
 
+
+
         /*Set up debugging file*/
         String noSpaceName;
-	if(Timing.start_job != null) {
+       if(Timing.start_job != null) {
             noSpaceName = "Job_" + Timing.start_job + "";
         } else {
             noSpaceName = "Initialize_" + Timing.start + "";
         }
-
+    
         /*Windows rejects any name with a space / or : so we remove them*/
         noSpaceName = noSpaceName.replaceAll(" ", "_");
         noSpaceName = noSpaceName.replaceAll("/", "_");
@@ -305,7 +309,7 @@ public class MinAreaTrap extends CvStage {
         String t_job= "";
         String t_board = "";
 
-
+        
         Logger.debug("/*Get job info*/");
 
         /*Get job info*/
@@ -316,7 +320,7 @@ public class MinAreaTrap extends CvStage {
         }else{
         //    t_job = "No Job";
         }
-
+        
         String string_dir = "LogFiles//"+ noSpaceName + "//" + t_job;
 
         File testTileDataFile = new File(string_dir);
@@ -372,7 +376,6 @@ public class MinAreaTrap extends CvStage {
         double unitPPX = cam.getUnitsPerPixel().getX();
         double unitPPY = cam.getUnitsPerPixel().getY();
     
-        Mat lines = img.clone();
         ArrayList<Pair> corner_list = new ArrayList<Pair>();
 
         //while(four_point_flag == 0){
@@ -406,7 +409,213 @@ public class MinAreaTrap extends CvStage {
         Logger.debug("6.2");
         Imgproc.cvtColor(result, result, Imgproc.COLOR_GRAY2RGB);
 
+// /*
+        //LeastSquaresFit Calculation---BEGINS
+        Location currentLocation = noz.getLocation();
+        double expectedangle = currentLocation.getRotation();
+        Logger.debug("Expected angle: " + expectedangle );
+        Imgcodecs.imwrite("CornerLog//"+ noSpaceName + image_iteration_name + "_inputoriginal.jpg"  , img);
+        int rows = img.rows(); //Calculates number of rows
+        int cols = img.cols(); //Calculates number of columns
+        int ch   = img.channels(); //Calculates number of channels (Grayscale: 1, RGB: 3, etc.)
+        Mat main = img.clone();
 
+        //Rotate original contour to back to ~0 for slicing 
+        Mat mainrot = new Mat();
+        Point rotPoint = new Point(cols / 2.0, rows / 2.0);
+        Mat rotMat = Imgproc.getRotationMatrix2D(rotPoint, expectedangle, 1);
+        Imgproc.warpAffine(img, mainrot, rotMat, img.size(),Imgproc.WARP_INVERSE_MAP);
+        //Imgcodecs.imwrite("CornerLog//"+ noSpaceName + image_iteration_name + "_inputrotated.jpg"  , mainrot);
+        Mat imainrot = mainrot.clone();
+        Mat itop  = mainrot.clone();
+        Mat ibot  = mainrot.clone();
+        Mat ilft  = mainrot.clone();
+        Mat irgt  = mainrot.clone();
+        
+        //Get maximum and minimum X,Y values in the contour
+        int xmax=-9999999;
+        int ymax=-9999999;
+        int xmin=9999999;
+        int ymin=9999999;
+        for (int i=0; i<rows; i++)
+        {
+            for (int j=0; j<cols; j++)
+            {
+                double[] datarot = imainrot.get(i, j);
+                if (datarot[0] > 0) 
+                {
+                    if (i>ymax){ymax=i;}
+                    if (j>xmax){xmax=j;}
+                    if (i<ymin){ymin=i;}
+                    if (j<xmin){xmin=j;}
+                }
+            }
+        }
+        int xwidth = (xmax-xmin);
+        int ywidth = (ymax-ymin);
+        int topbnd = (int) Math.round(  ymin + ywidth*0.05);
+        int botbnd = (int) Math.round(  ymax - ywidth*0.05);
+        int lftbnd = (int) Math.round(  xmin + xwidth*0.05);
+        int rgtbnd = (int) Math.round(  xmax - xwidth*0.05);
+
+        //Separate contours using dynamic windows
+        for (int i=0; i<rows; i++)
+        {
+            for (int j=0; j<cols; j++)
+            {
+                double[] datatop = itop.get(i, j); //Stores element in an array
+                double[] databot = ibot.get(i, j); //Stores element in an array
+                double[] datalft = ilft.get(i, j); //Stores element in an array
+                double[] datargt = irgt.get(i, j); //Stores element in an array
+                
+                //Pixel modification for top  
+                if (i >= topbnd || j < lftbnd || j > rgtbnd){
+                     datatop[0] = 0;
+                     itop.put(i, j, datatop);
+                }
+                //Pixel modification for bot 
+                if (i <= botbnd || j < lftbnd || j > rgtbnd){
+                     databot[0] = 0;
+                     ibot.put(i, j, databot);                    
+                }
+                //Pixel modification for lft 
+                if (j >= lftbnd || i < topbnd || i > botbnd){
+                     datalft[0] = 0;
+                     ilft.put(i, j, datalft);                    
+                }  
+                //Pixel modification for rgt
+                if (j <= rgtbnd || i < topbnd || i > botbnd){
+                     datargt[0] = 0;
+                     irgt.put(i, j, datargt);                    
+                }
+            }
+        }
+        //Imgcodecs.imwrite("CornerLog//"+ noSpaceName + image_iteration_name + "_pre_topside.jpg", itop);
+        //Imgcodecs.imwrite("CornerLog//"+ noSpaceName + image_iteration_name + "_pre_botside.jpg", ibot);
+        //Imgcodecs.imwrite("CornerLog//"+ noSpaceName + image_iteration_name + "_pre_lftside.jpg", ilft);
+        //Imgcodecs.imwrite("CornerLog//"+ noSpaceName + image_iteration_name + "_pre_rgtside.jpg", irgt);
+
+        //Rotating points back before fit
+        Mat backrotMat = Imgproc.getRotationMatrix2D(rotPoint, -expectedangle, 1);
+        Imgproc.warpAffine(itop, itop, backrotMat, img.size(),Imgproc.WARP_INVERSE_MAP);        
+        Imgproc.warpAffine(ibot, ibot, backrotMat, img.size(),Imgproc.WARP_INVERSE_MAP); 
+        Imgproc.warpAffine(ilft, ilft, backrotMat, img.size(),Imgproc.WARP_INVERSE_MAP); 
+        Imgproc.warpAffine(irgt, irgt, backrotMat, img.size(),Imgproc.WARP_INVERSE_MAP);
+        Imgcodecs.imwrite("CornerLog//"+ noSpaceName + image_iteration_name + "_topside.jpg", itop);
+        Imgcodecs.imwrite("CornerLog//"+ noSpaceName + image_iteration_name + "_botside.jpg", ibot);
+        Imgcodecs.imwrite("CornerLog//"+ noSpaceName + image_iteration_name + "_lftside.jpg", ilft);
+        Imgcodecs.imwrite("CornerLog//"+ noSpaceName + image_iteration_name + "_rgtside.jpg", irgt);
+
+        //Initialization
+        Mat line_top      = new Mat();
+        Mat line_bot      = new Mat();
+        Mat line_lft      = new Mat();
+        Mat line_rgt      = new Mat();
+
+        //Get points
+        Mat pointstop = Mat.zeros(itop.size(),itop.type());
+        Mat pointsbot = Mat.zeros(ibot.size(),ibot.type());
+        Mat pointslft = Mat.zeros(ilft.size(),ilft.type());
+        Mat pointsrgt = Mat.zeros(irgt.size(),irgt.type());
+        Core.findNonZero(itop, pointstop);
+        Core.findNonZero(ibot, pointsbot);
+        Core.findNonZero(ilft, pointslft);
+        Core.findNonZero(irgt, pointsrgt);
+        MatOfPoint cnt_top = new MatOfPoint(pointstop);
+        MatOfPoint cnt_bot = new MatOfPoint(pointsbot);
+        MatOfPoint cnt_lft = new MatOfPoint(pointslft);
+        MatOfPoint cnt_rgt = new MatOfPoint(pointsrgt);
+
+        //Fits line to contour
+        Imgproc.fitLine(cnt_top, line_top, Imgproc.DIST_L2, 0, 0.01, 0.01);
+        Imgproc.fitLine(cnt_bot, line_bot, Imgproc.DIST_L2, 0, 0.01, 0.01);
+        Imgproc.fitLine(cnt_lft, line_lft, Imgproc.DIST_L2, 0, 0.01, 0.01);
+        Imgproc.fitLine(cnt_rgt, line_rgt, Imgproc.DIST_L2, 0, 0.01, 0.01);
+        //Get fitted line information
+        double vx_top  = line_top.get(0,0)[0]*10000000;
+        double vy_top  = line_top.get(1,0)[0]*10000000;
+        double x0_top  = line_top.get(2,0)[0];
+        double y0_top  = line_top.get(3,0)[0];
+        double vx_bot  = line_bot.get(0,0)[0]*10000000;
+        double vy_bot  = line_bot.get(1,0)[0]*10000000;
+        double x0_bot  = line_bot.get(2,0)[0];
+        double y0_bot  = line_bot.get(3,0)[0];
+        double vx_lft  = line_lft.get(0,0)[0]*10000000;
+        double vy_lft  = line_lft.get(1,0)[0]*10000000;
+        double x0_lft  = line_lft.get(2,0)[0];
+        double y0_lft  = line_lft.get(3,0)[0];
+        double vx_rgt  = line_rgt.get(0,0)[0]*10000000;
+        double vy_rgt  = line_rgt.get(1,0)[0]*10000000;
+        double x0_rgt  = line_rgt.get(2,0)[0];
+        double y0_rgt  = line_rgt.get(3,0)[0];
+        Logger.debug("Points from the fits:");
+        Logger.debug("- vy    (top): "+vy_top);
+        Logger.debug("- vx    (top): "+vx_top);
+        Logger.debug("- vy    (bot): "+vy_bot);
+        Logger.debug("- vx    (bot): "+vx_bot);
+        Logger.debug("- vy    (lft): "+vy_lft);
+        Logger.debug("- vx    (lft): "+vx_lft);
+        Logger.debug("- vy    (rgt): "+vy_rgt);
+        Logger.debug("- vx    (rgt): "+vx_rgt);
+        double inter_top = (-x0_top*(vy_top/vx_top) ) + y0_top;
+        double inter_bot = (-x0_bot*(vy_bot/vx_bot) ) + y0_bot;
+        double inter_lft = (-x0_lft*(vy_lft/vx_lft) ) + y0_lft;
+        double inter_rgt = (-x0_rgt*(vy_rgt/vx_rgt) ) + y0_rgt;
+        double slope_top = (vy_top/vx_top);
+        double slope_bot = (vy_bot/vx_bot);
+        double slope_lft = (vy_lft/vx_lft);
+        double slope_rgt = (vy_rgt/vx_rgt);
+        Logger.debug("Computed parameters from the fits:");
+        Logger.debug("- slope    (top): "+slope_top);
+        Logger.debug("- intercept(top): "+inter_top);
+        Logger.debug("- slope    (bot): "+slope_bot);
+        Logger.debug("- intercept(bot): "+inter_bot);
+        Logger.debug("- slope    (lft): "+slope_lft);
+        Logger.debug("- intercept(lft): "+inter_lft);
+        Logger.debug("- slope    (rgt): "+slope_rgt);
+        Logger.debug("- intercept(rgt): "+inter_rgt);
+        int x1_top = (int) Math.round(0);
+        int x2_top = (int) Math.round(cols*1000);
+        int y1_top = (int) Math.round(x1_top*slope_top + inter_top);
+        int y2_top = (int) Math.round(x2_top*slope_top + inter_top);
+        int x1_bot = (int) Math.round(0);
+        int x2_bot = (int) Math.round(cols*1000);
+        int y1_bot = (int) Math.round(x1_bot*slope_bot + inter_bot);
+        int y2_bot = (int) Math.round(x2_bot*slope_bot + inter_bot);
+        int y1_lft = (int) Math.round(0);
+        int y2_lft = (int) Math.round(rows*1000);
+        int x1_lft = (int) Math.round((y1_lft - inter_lft)/slope_lft);
+        int x2_lft = (int) Math.round((y2_lft - inter_lft)/slope_lft);
+        int y1_rgt = (int) Math.round(0);
+        int y2_rgt = (int) Math.round(rows*1000);
+        int x1_rgt = (int) Math.round((y1_rgt - inter_rgt)/slope_rgt);
+        int x2_rgt = (int) Math.round((y2_rgt - inter_rgt)/slope_rgt);
+        Imgproc.cvtColor(main, main, Imgproc.COLOR_GRAY2RGB);
+        Imgproc.line(main, new Point(x1_top, y1_top), new Point(x2_top, y2_top),new Scalar(0, 0, 255),1);
+        Imgproc.line(main, new Point(x1_bot, y1_bot), new Point(x2_bot, y2_bot),new Scalar(0, 0, 255),1);
+        Imgproc.line(main, new Point(x1_lft, y1_lft), new Point(x2_lft, y2_lft),new Scalar(0, 0, 255),1);
+        Imgproc.line(main, new Point(x1_rgt, y1_rgt), new Point(x2_rgt, y2_rgt),new Scalar(0, 0, 255),1);        
+        Imgcodecs.imwrite("CornerLog//"+ noSpaceName + image_iteration_name + "_lsfits.jpg", main);
+        int [] topp  = new int[]{x1_top, y1_top, x2_top, y2_top}; 
+        int [] botp  = new int[]{x1_bot, y1_bot, x2_bot, y2_bot}; 
+        int [] lftp  = new int[]{x1_lft, y1_lft, x2_lft, y2_lft}; 
+        int [] rgtp  = new int[]{x1_rgt, y1_rgt, x2_rgt, y2_rgt}; 
+        Mat lines  = new Mat(4,1,CvType.CV_32SC4);
+        lines.put(0,0,topp);
+        lines.put(1,0,botp);
+        lines.put(2,0,lftp);
+        lines.put(3,0,rgtp);
+        for (int i = 0; i < lines.rows(); i++) {
+            double[] val = lines.get(i, 0);
+            Logger.debug("X1:" + val[0] + " Y1:" + val[1] + "X2:" + val[2] + " Y2:" + val[3]);
+        }
+        //LeastSquaresFit Calculation---ENDS
+// */
+
+
+/*
+        //Hough Lines Code -- BEGINS
+        Mat lines = new Mat(); 
         Logger.debug("7");
         Logger.debug(this.rho);
         Logger.debug(this.theta);
@@ -414,19 +623,18 @@ public class MinAreaTrap extends CvStage {
         Logger.debug(this.maxGap);
         Logger.debug(this.minLineLength);
         Imgproc.HoughLinesP(save, lines,this.rho, this.theta,this.threshold,this.minLineLength,this.maxGap);
-
-	    Mat copy = img.clone();
-
-
-
+        Mat copy = img.clone();
+        Logger.debug("lines: " + lines);
       	for (int i = 0; i < lines.rows(); i++) {
             double[] val = lines.get(i, 0);
-            //Logger.debug("X1:" + val[0] + " Y1:" + val[1] + "X2:" + val[2] + " Y2:" + val[3]);
+            //Logger.debug("line: " + val);
+            Logger.debug("X1: " + val[0] + ", Y1: " + val[1] + ", X2: " + val[2] + ", Y2: " + val[3]);
             Imgproc.line(copy, new Point(val[0], val[1]), new Point(val[2], val[3]), new Scalar(255, 255, 255), 1);
         }
-
         Logger.debug("7.2");
-        Imgcodecs.imwrite("CornerLog//"+ noSpaceName + image_iteration_name + ".jpg", copy);
+        Imgcodecs.imwrite("CornerLog//"+ noSpaceName + image_iteration_name + "_houghlinesp.jpg", copy);
+        //Hough Lines Code -- ENDS
+*/
 
         Logger.debug("8");
 
@@ -434,7 +642,6 @@ public class MinAreaTrap extends CvStage {
             double[] val = lines.get(i, 0);
 	    //Logger.debug("trial" + lines.get(i, 0));       
         }
-
 
         /*Set up lists*/
         //(Should simplify this, is probably overly complicated)
@@ -513,6 +720,7 @@ public class MinAreaTrap extends CvStage {
         /*Iterate over all the found lines and store their data in various
          *lists for later use*/
         for (int i = 0; i < lines.rows(); i++) {
+            Logger.debug("processing line: "+ i);
             double[] val = lines.get(i, 0);
             double diff_x = (int)val[0] - (int)val[2];
             double diff_y = (int)val[1] - (int)val[3];
@@ -525,21 +733,28 @@ public class MinAreaTrap extends CvStage {
                 
                 double angle = Math.atan(diff_y/diff_x);
                 double intercept = val[1]-(slope*val[0]);
+                Logger.debug("- slope:     "+slope);
+                //Logger.debug("- angle:     "+angle);
+                Logger.debug("- intercept: "+intercept);
                 
                 if(Math.abs(angle)  <= 0.9 &&  Math.abs(angle) >= 0.5){
+                    Logger.debug("angle: " + Math.abs(angle));
                     continue;
                 }
                 if(diff_x == 0){
+                    //Logger.debug("here 1 ");
                     intercept = val[0];
                 }
                 
                 if(first_angle == 0){
+                    //Logger.debug("here 2 ");
                     first_angle = angle;
                 }
                 else if(slope < (first_angle+0.2) && slope > (first_angle-0.2)){
-                    
+                    //Logger.debug("here 3 ");                    
                 }
                 else if(second_angle == 0){
+                    //Logger.debug("here 4 ");    
                     second_angle = angle;
                 }
 
@@ -550,6 +765,7 @@ public class MinAreaTrap extends CvStage {
 
                     
                     if(temp_val == 0){
+                        //Logger.debug("here 5, m: "+ m);
                         intercept_list.set(m,intercept);
                         angle_list.set(m,angle);
                         
@@ -559,8 +775,9 @@ public class MinAreaTrap extends CvStage {
                         average_XCheck.set(m,val[0]);
                         average_YCheck.set(m,val[1]);
                         
-                        if(Math.abs(angle) > 0.7){
+                        if(Math.abs(angle) > 0.7){    
                             big_angle.set(m,1.0);
+                            //Logger.debug("here 6, m:"+ m);
                         }
 
                         break;
@@ -572,11 +789,15 @@ public class MinAreaTrap extends CvStage {
                     double percent_y = (Math.abs(val[1] - average_YCheck.get(m))/((val[1] + average_YCheck.get(m))/2))*100;
                     
                     if(big_angle.get(m) == 0){
+                      //Logger.debug("here 7, m:"+ m);
                       if(Math.abs(angle) < 0.5){
+                        //Logger.debug("here 8, m:" + m);
                         if(Math.abs(percent_y) < 40.0){
+                            //Logger.debug("here 9, m:" + m);
                             listOfInter[m].add(intercept);
                             listOfLists[m].add(slope);
                             if(slope == Double.POSITIVE_INFINITY){
+                                //Logger.debug("here 10, m:");
                                 listOfInf[m].add(intercept);
                             }
                             listOfAngle[m].add(Math.abs(angle));
@@ -586,12 +807,15 @@ public class MinAreaTrap extends CvStage {
                       }
                     }
                     else{
+                        //Logger.debug("here 11,  m: " + m);
                         if(Math.abs(angle) > 0.5){
-
+                            //Logger.debug("here 12,  m: " + m);
                             if(Math.abs(percent_x) < 40.0){
+                                //Logger.debug("here 13, m:" + m);
                                 listOfInter[m].add(intercept);
                                 listOfLists[m].add(slope);
                                 if(slope == Double.POSITIVE_INFINITY){
+                                    //Logger.debug("here 14, m:" + m);
                                     listOfInf[m].add(intercept);
                                 }
                                 listOfAngle[m].add(Math.abs(angle));
@@ -613,7 +837,7 @@ public class MinAreaTrap extends CvStage {
             double temp_avg_inf = 0.0;
 
             for(int n = 0; n < listOfLists[m].size(); n++){
-
+                //Logger.debug("here 15: "+listOfLists[m].size()); 
                 temp_avg_slope += listOfLists[m].get(n);
                 temp_avg_inter += listOfInter[m].get(n);
                 temp_avg_angle += listOfAngle[m].get(n);
@@ -640,12 +864,22 @@ public class MinAreaTrap extends CvStage {
 	    //Logger.debug("slope: " +average_slope.get(i) + " inter: " +  average_inter.get(i));
             double inf = Double.POSITIVE_INFINITY;
             if(Math.abs(average_slope.get(i)) != inf && !Double.isNaN(average_slope.get(i))){
-                Imgproc.line(result,new Point(0,0*average_slope.get(i) + average_inter.get(i)), new Point(1920,1920*average_slope.get(i) + average_inter.get(i)),new Scalar(0, 100, 0),5);
+               // Imgproc.line(result,new Point(0,0*average_slope.get(i) + average_inter.get(i)), new Point(1920,1920*average_slope.get(i) + average_inter.get(i)),new Scalar(0, 100, 0),5);
+                if (i<2)
+                {
+                   Imgproc.line(result,new Point(0.0,0.0*average_slope.get(i) + average_inter.get(i)), new Point(cols*1000, (cols*1000*average_slope.get(i)) + average_inter.get(i)),new Scalar(0, 100, 0),5);
+                }
+                else{
+                   Imgproc.line(result,new Point((0.0 - average_inter.get(i))/average_slope.get(i),0.0), new Point( (rows*1000 - average_inter.get(i))/average_slope.get(i),rows*1000),new Scalar(0, 100, 0),5);
+                }
+                Logger.debug("average_slope: " + average_slope.get(i));
+                Logger.debug("average_inter: " + average_inter.get(i));
             }
             else{
                 //Logger.debug("inf: " +average_inf.get(i) + " inter: " +  average_inter.get(i));
                 average_inter.set(i, average_inf.get(i));
                 Imgproc.line(result,new Point(average_inf.get(i),0.0), new Point(average_inf.get(i),1920 ),new Scalar(0, 100, 0),5);
+                Logger.debug("average_inf: " + Math.abs(average_inf.get(i)));
             }
         }
 
